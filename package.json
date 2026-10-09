@@ -1,0 +1,9 @@
+{
+  "name": "sammlung-mbg-2028",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sammlung MBG · Abi 2028 – begehbares 3D-Museum",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}

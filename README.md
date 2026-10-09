@@ -30,4 +30,6 @@ Bilder laden nur über einen Webserver, nicht per Doppelklick auf `index.html`:
 python3 -m http.server 8000
 ```
 
-Dann http://localhost:8000 öffnen. Online geht es z. B. über GitHub Pages (Settings → Pages → Branch wählen).
+Dann http://localhost:8000 öffnen.
+
+**Render (Docker):** Das `Dockerfile` startet `server.js` auf `$PORT`. Health-Check: `/healthz`.
