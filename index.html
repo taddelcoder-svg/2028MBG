@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#14110f">
+<title>Sammlung MBG · Abi 2028</title>
+<style>
+  @font-face{font-family:'Barlow SC';src:url(vendor/barlow-semi-condensed-600.woff2) format('woff2');font-weight:600;font-display:swap}
+  @font-face{font-family:'Barlow SC';src:url(vendor/barlow-semi-condensed-800.woff2) format('woff2');font-weight:800;font-display:swap}
+  :root{--gold:#d8b46a;--ink:#14110f;--paper:#f4efe6}
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);
+    font-family:'Barlow SC',system-ui,sans-serif;font-weight:600;
+    touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+    -webkit-tap-highlight-color:transparent;overscroll-behavior:none;-webkit-text-size-adjust:100%}
+  canvas#welt{position:fixed;inset:0;width:100%;height:100%;display:block}
+  button{font:inherit;cursor:pointer;touch-action:manipulation}
+
+  /* Startbildschirm */
+  #start{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;
+    background:radial-gradient(ellipse at center,rgba(20,17,15,.55),rgba(20,17,15,.92));z-index:20}
+  #start .karte{max-width:520px;text-align:center}
+  #start h1{font-weight:800;font-size:clamp(40px,9vw,76px);letter-spacing:.06em;margin:0;line-height:.95;text-transform:uppercase}
+  #start h2{font-weight:600;font-size:clamp(20px,4.5vw,30px);color:var(--gold);letter-spacing:.3em;margin:10px 0 26px;text-transform:uppercase}
+  #start p{opacity:.8;line-height:1.45;margin:0 0 8px}
+  .knopf{background:var(--gold);color:var(--ink);border:0;border-radius:999px;padding:14px 34px;font-weight:800;
+    font-size:20px;letter-spacing:.08em;text-transform:uppercase;margin-top:22px;box-shadow:0 6px 24px rgba(216,180,106,.3)}
+  .knopf.leise{background:transparent;color:var(--paper);border:1px solid rgba(244,239,230,.35);box-shadow:none;font-size:16px;padding:10px 22px}
+  .hilfe{margin-top:26px;font-size:15px;opacity:.65;line-height:1.6}
+  .hilfe kbd{display:inline-block;border:1px solid rgba(244,239,230,.4);border-radius:5px;padding:0 6px;font:inherit;font-size:13px}
+
+  /* HUD */
+  #hud{position:fixed;top:max(14px,env(safe-area-inset-top));left:16px;right:16px;display:none;justify-content:space-between;
+    align-items:flex-start;pointer-events:none;z-index:5}
+  #hud .marke{font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:15px;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+  #hud .marke span{color:var(--gold)}
+  #hud .rechts{display:flex;gap:8px;pointer-events:auto}
+  .pille{background:rgba(20,17,15,.62);border:1px solid rgba(244,239,230,.18);color:var(--paper);border-radius:999px;
+    padding:8px 16px;font-size:15px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  #fund b{color:var(--gold)}
+  #fadenkreuz{position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:rgba(244,239,230,.7);
+    display:none;z-index:4;pointer-events:none;transition:transform .15s,background .15s}
+  #fadenkreuz.aktiv{transform:scale(2.2);background:var(--gold)}
+  #hinweis{position:fixed;left:50%;bottom:calc(120px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:5;
+    display:none;white-space:nowrap;pointer-events:auto}
+  #hinweis b{color:var(--gold)}
+  #meldung{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:6;opacity:0;transition:opacity .4s;pointer-events:none}
+
+  /* Joystick (Touch) */
+  #stick{position:fixed;left:calc(28px + env(safe-area-inset-left));bottom:calc(28px + env(safe-area-inset-bottom));width:130px;height:130px;
+    border-radius:50%;background:rgba(244,239,230,.08);border:1px solid rgba(244,239,230,.25);display:none;z-index:5}
+  #stick i{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px;border-radius:50%;background:rgba(244,239,230,.35)}
+
+  /* Detailansicht & Katalog */
+  .schicht{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;padding:20px;
+    background:rgba(10,8,7,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  .schicht.offen{display:flex}
+  #detail .inhalt{display:flex;gap:28px;max-width:1100px;width:100%;max-height:100%;align-items:center}
+  #detail img{max-width:62%;max-height:80vh;object-fit:contain;border:10px solid #2a211a;box-shadow:0 20px 60px rgba(0,0,0,.6);background:#000}
+  #detail .text{flex:1;min-width:0;overflow:auto;max-height:80vh;-webkit-user-select:text;user-select:text;touch-action:pan-y}
+  #detail .art{color:var(--gold);letter-spacing:.25em;text-transform:uppercase;font-size:14px}
+  #detail h3{font-weight:800;font-size:clamp(28px,4vw,44px);margin:6px 0 10px;line-height:1.05}
+  #detail .meta{opacity:.7;margin-bottom:16px}
+  #detail .zitat{font-size:clamp(22px,3vw,32px);font-style:italic;line-height:1.3;margin:0 0 16px}
+  #detail .beschr{line-height:1.55;opacity:.9;white-space:pre-wrap}
+  #detail .navi{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}
+  .zu{position:fixed;top:max(16px,env(safe-area-inset-top));right:18px;z-index:31;width:46px;height:46px;border-radius:50%;
+    border:1px solid rgba(244,239,230,.35);background:rgba(20,17,15,.6);color:var(--paper);font-size:24px;line-height:1}
+  @media (max-width:760px){
+    #detail .inhalt{flex-direction:column;gap:16px;overflow:auto;touch-action:pan-y}
+    #detail img{max-width:100%;max-height:52vh}
+    #detail .text{max-height:none}
+  }
+  #katalog .liste{max-width:760px;width:100%;max-height:84vh;overflow:auto;touch-action:pan-y}
+  #katalog h3{font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin:0 0 4px}
+  #katalog .unter{opacity:.65;margin-bottom:16px}
+  #katalog .raum{color:var(--gold);letter-spacing:.2em;text-transform:uppercase;font-size:13px;margin:18px 0 6px}
+  #katalog button.eintrag{display:flex;width:100%;align-items:center;gap:12px;text-align:left;background:rgba(244,239,230,.05);
+    border:1px solid rgba(244,239,230,.1);color:var(--paper);border-radius:10px;padding:10px 14px;margin-bottom:6px}
+  #katalog button.eintrag:hover{background:rgba(244,239,230,.12)}
+  #katalog .haken{width:22px;text-align:center;color:var(--gold)}
+  #katalog .klein{opacity:.55;font-size:13px;margin-left:auto}
+</style>
+</head>
+<body>
+<canvas id="welt"></canvas>
+
+<div id="start">
+  <div class="karte">
+    <h1 id="startTitel">Sammlung MBG</h1>
+    <h2 id="startUnter">Abi 2028</h2>
+    <p>Ein Museum voller Erinnerungen. Lauf durch die Räume und entdecke alle Exponate.</p>
+    <button class="knopf" id="betreten">Museum betreten</button>
+    <div class="hilfe" id="hilfeMaus">
+      <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> laufen · Maus umschauen · <kbd>Shift</kbd> schneller<br>
+      <kbd>E</kbd> / Klick Exponat ansehen · <kbd>K</kbd> Katalog · <kbd>Esc</kbd> Pause
+    </div>
+    <div class="hilfe" id="hilfeTouch" style="display:none">
+      Links: Joystick zum Laufen · Rechts wischen zum Umschauen<br>
+      Exponat antippen zum Ansehen
+    </div>
+  </div>
+</div>
+
+<div id="hud">
+  <div class="marke"><span id="hudTitel">Sammlung MBG</span> · <span id="hudRaum">Eingang</span></div>
+  <div class="rechts">
+    <div class="pille" id="fund">Entdeckt <b>0</b>/0</div>
+    <button class="pille" id="katalogKnopf">Katalog</button>
+  </div>
+</div>
+<div id="fadenkreuz"></div>
+<button class="pille" id="hinweis"></button>
+<div class="pille" id="meldung"></div>
+<div id="stick"><i></i></div>
+
+<div class="schicht" id="detail">
+  <button class="zu" data-zu>×</button>
+  <div class="inhalt">
+    <img id="dBild" alt="">
+    <div class="text">
+      <div class="art" id="dArt"></div>
+      <h3 id="dTitel"></h3>
+      <div class="meta" id="dMeta"></div>
+      <p class="zitat" id="dZitat"></p>
+      <div class="beschr" id="dBeschr"></div>
+      <div class="navi">
+        <button class="knopf leise" id="dZurueck">‹ Vorheriges</button>
+        <button class="knopf leise" id="dWeiter">Nächstes ›</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="schicht" id="katalog">
+  <button class="zu" data-zu>×</button>
+  <div class="liste">
+    <h3>Katalog</h3>
+    <div class="unter">Antippen, um zum Exponat zu gehen.</div>
+    <div id="kListe"></div>
+  </div>
+</div>
+
+<script>
+  // Zoomschutz für iPad/iPhone
+  ['gesturestart','gesturechange','gestureend'].forEach(n => document.addEventListener(n, e => e.preventDefault(), { passive:false }));
+  let letzterTipp = 0;
+  document.addEventListener('touchend', e => { const t = Date.now(); if (t - letzterTipp < 320 && !e.target.closest('.text')) e.preventDefault(); letzterTipp = t; }, { passive:false });
+</script>
+<script src="vendor/three.min.js"></script>
+<script src="sammlung.js"></script>
+<script src="museum.js"></script>
+</body>
+</html>
