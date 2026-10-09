@@ -81,6 +81,32 @@
   #katalog button.eintrag:hover{background:rgba(244,239,230,.12)}
   #katalog .haken{width:22px;text-align:center;color:var(--gold)}
   #katalog .klein{opacity:.55;font-size:13px;margin-left:auto}
+  #katalog .etagenkopf{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;margin:22px 0 8px}
+  .nr{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;border-radius:50%;
+    background:var(--gold);color:var(--ink);font-weight:800;font-size:15px;padding:0 4px;box-sizing:border-box}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+  .chip{background:rgba(216,180,106,.12);border:1px solid rgba(216,180,106,.35);color:var(--paper);border-radius:999px;padding:5px 12px;font-size:14px}
+  .chip.still{opacity:.7}
+
+  /* Aufzug */
+  #aufzug .liste{max-width:520px;width:100%;max-height:86vh;overflow:auto;touch-action:pan-y}
+  #aufzug h3{font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin:0 0 14px}
+  #aufzug .etage{display:flex;width:100%;align-items:center;gap:14px;text-align:left;background:rgba(244,239,230,.05);
+    border:1px solid rgba(244,239,230,.12);color:var(--paper);border-radius:12px;padding:12px 16px;margin-bottom:8px;font-size:18px}
+  #aufzug .etage:hover{background:rgba(244,239,230,.12)}
+  #aufzug .etage.hier{border-color:var(--gold);background:rgba(216,180,106,.12)}
+  #aufzug .etage .nr{min-width:40px;height:40px;font-size:18px}
+  #aufzug .etage small{display:block;opacity:.6;font-size:14px;font-weight:600}
+  #aufzug .klein{margin-left:auto;color:var(--gold);font-size:13px}
+
+  /* Portal */
+  #portalInfo .karte{max-width:520px;text-align:center}
+  #portalInfo h3{font-weight:800;font-size:clamp(28px,5vw,42px);margin:6px 0 10px}
+  #portalInfo p{opacity:.8;line-height:1.5}
+  #portalInfo a.knopf{display:inline-block;text-decoration:none}
+
+  #blende{position:fixed;inset:0;background:#0b0908;opacity:0;pointer-events:none;z-index:25;transition:opacity .35s}
+  #blende.zu{opacity:1}
 </style>
 </head>
 <body>
@@ -90,15 +116,15 @@
   <div class="karte">
     <h1 id="startTitel">Sammlung MBG</h1>
     <h2 id="startUnter">Abi 2028</h2>
-    <p>Ein Museum voller Erinnerungen. Lauf durch die Räume und entdecke alle Exponate.</p>
+    <p>Ein Museum voller Erinnerungen. Fahr mit dem Aufzug durch die Etagen und entdecke alle Exponate.</p>
     <button class="knopf" id="betreten">Museum betreten</button>
     <div class="hilfe" id="hilfeMaus">
       <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> laufen · Maus umschauen · <kbd>Shift</kbd> schneller<br>
-      <kbd>E</kbd> / Klick Exponat ansehen · <kbd>K</kbd> Katalog · <kbd>Esc</kbd> Pause
+      <kbd>E</kbd> / Klick ansehen &amp; benutzen · <kbd>F</kbd> Aufzug · <kbd>K</kbd> Katalog · <kbd>Esc</kbd> Pause
     </div>
     <div class="hilfe" id="hilfeTouch" style="display:none">
       Links: Joystick zum Laufen · Rechts wischen zum Umschauen<br>
-      Exponat antippen zum Ansehen
+      Exponate, Aufzug und Portale antippen
     </div>
   </div>
 </div>
@@ -107,6 +133,7 @@
   <div class="marke"><span id="hudTitel">Sammlung MBG</span> · <span id="hudRaum">Eingang</span></div>
   <div class="rechts">
     <div class="pille" id="fund">Entdeckt <b>0</b>/0</div>
+    <button class="pille" id="aufzugKnopf">Aufzug</button>
     <button class="pille" id="katalogKnopf">Katalog</button>
   </div>
 </div>
@@ -133,11 +160,31 @@
   </div>
 </div>
 
+<div class="schicht" id="aufzug">
+  <button class="zu" data-zu>×</button>
+  <div class="liste">
+    <h3>Aufzug</h3>
+    <div id="aListe"></div>
+  </div>
+</div>
+
+<div class="schicht" id="portalInfo">
+  <button class="zu" data-zu>×</button>
+  <div class="karte">
+    <div class="art" style="color:var(--gold);letter-spacing:.25em;text-transform:uppercase;font-size:14px">Portal</div>
+    <h3 id="pTitel"></h3>
+    <p id="pBeschr"></p>
+    <a class="knopf" id="pLink" href="#" target="_blank" rel="noopener noreferrer">Portal öffnen</a>
+  </div>
+</div>
+
+<div id="blende"></div>
+
 <div class="schicht" id="katalog">
   <button class="zu" data-zu>×</button>
   <div class="liste">
     <h3>Katalog</h3>
-    <div class="unter">Antippen, um zum Exponat zu gehen.</div>
+    <div class="unter">Antippen, um zum Raum oder Exponat zu gehen.</div>
     <div id="kListe"></div>
   </div>
 </div>

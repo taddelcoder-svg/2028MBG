@@ -4,23 +4,31 @@ Ein begehbares 3D-Museum im Browser (three.js). Man läuft durch die Räume, sch
 
 ## Steuerung
 
-- **Computer:** `W A S D` / Pfeiltasten laufen, Maus umschauen, `Shift` schneller, `E` oder Klick Exponat ansehen, `K` Katalog, `Esc` Pause
-- **iPad / Handy:** Joystick links zum Laufen, rechts wischen zum Umschauen, Exponat antippen
+- **Computer:** `W A S D` / Pfeiltasten laufen, Maus umschauen, `Shift` schneller, `E` oder Klick ansehen bzw. benutzen, `F` Aufzug, `K` Katalog, `Esc` Pause
+- **iPad / Handy:** Joystick links zum Laufen, rechts wischen zum Umschauen, Exponate, Aufzug und Portale antippen
 
-Im **Katalog** stehen alle Exponate nach Räumen; ein Tipp darauf bringt dich direkt davor.
+Im **Katalog** stehen alle Etagen, Räume und Exponate; ein Tipp darauf bringt dich direkt hin.
 
-## Exponate hinzufügen
+## Aufbau
 
-1. Bild in den Ordner `exponate/` legen (jpg/png, am besten nicht größer als ca. 2000 px).
-2. In `sammlung.js` einen Eintrag ergänzen:
+Lobby (Erdgeschoss), je eine Etage pro Halbjahr, eine Etage „Kurse“, eine Etage „Wir“ (ein Raum pro Person), Hall of Fame und ein Portalsaal. Alles wird in `sammlung.js` beschrieben – die Datei erklärt oben alle Felder. Bilder kommen in den Ordner `exponate/`.
+
+Beispiel für einen Raum mit Exponaten:
 
 ```js
-{ art:'bild', titel:'Abiball', bild:'exponate/abiball.jpg', von:'Stufe', datum:'Juni 2028', beschreibung:'…' },
-{ art:'zitat', titel:'Mathe-LK', text:'Das ist trivial.', von:'Herr X' },
-{ art:'objekt', titel:'Der Stufen-Pokal', bild:'exponate/pokal.jpg' },
+{ name:'Stufenfahrt', exponate:[
+  { art:'bild', titel:'Ankunft', bild:'exponate/stufenfahrt-1.jpg', datum:'Sep 2026' },
+  { art:'zitat', titel:'Mathe-LK', text:'Das ist trivial.', von:'Herr X' },
+  { art:'objekt', titel:'Der Stufen-Pokal', bild:'exponate/pokal.jpg' }
+] }
 ```
 
-Pro Raum gibt es 8 Wandplätze (Bilder und Zitate) und 2 Vitrinen (Objekte). Werden es mehr, baut das Museum automatisch weitere Räume an.
+Beispiel für Portale:
+
+```js
+{ titel:'Unser Insta', link:'https://instagram.com/…' },
+{ titel:'Zu Person 1', etage:'personen', raum:'Person 1' }
+```
 
 ## Starten
 
